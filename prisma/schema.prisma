@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// Saatiril - Sistem Manajemen Foto Wisuda
+// Offline-first with local SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Mahasiswa (Students) - Main data table
+model Mahasiswa {
+  id              String   @id @default(cuid())
+  nim             String   @unique
+  nama            String
+  fakultas        String?
+  prodi           String?
+  sesi            String?   // Sesi A atau B
+  nomorUrut       Int?      // Nomor urut pemanggilan
+  status          String    @default("menunggu") // menunggu, dipanggil, prosesi, selesai
+  fotoRaw1        String?   // Path foto raw 1
+  fotoRaw2        String?   // Path foto raw 2
+  fotoFramed      String?   // Path foto framed
+  gdriveFolderId  String?   // Google Drive folder ID
+  gdriveRaw1Id    String?   // GDrive file ID foto raw 1
+  gdriveRaw2Id    String?   // GDrive file ID foto raw 2
+  gdriveFramedId  String?   // GDrive file ID foto framed
+  dipanggilPada   DateTime? // Kapan dipanggil oleh MC
+  fotoDiambilPada DateTime? // Kapan foto diambil
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Session management for multi-session ceremonies
+model SesiProsesi {
+  id          String   @id @default(cuid())
+  nama        String   @unique // e.g., "Prosesi A", "Prosesi B"
+  aktif       Boolean  @default(false)
+  mahasiswaId String?  // Currently being called
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Google Drive Configuration
+model GDriveConfig {
+  id              String   @id @default(cuid())
+  nama            String   @unique // e.g., "default"
+  serviceAccountJson String // JSON credential
+  rootFolderId    String  // Root folder ID in GDrive
+  aktif           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// App Configuration
+model AppConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Photo Log - for tracking photo operations
+model PhotoLog {
+  id          String   @id @default(cuid())
+  mahasiswaId String
+  tipe        String   // "raw1", "raw2", "framed"
+  sumber      String   // "local", "gdrive"
+  path        String?  // File path or URL
+  status      String   @default("pending") // pending, success, failed
+  pesan       String?  // Error message if any
+  createdAt   DateTime @default(now())
+}
