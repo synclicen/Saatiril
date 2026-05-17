@@ -50,5 +50,12 @@ test
 prompt
 
 server.log
+# electron build output
+/dist-electron
+
+# db files (local only)
+/db/*.db
+/db/*.db-journal
+
 # Skills directory
 /skills/
